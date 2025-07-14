@@ -13,8 +13,18 @@ public class UserInfoObject {
     public UserInfoObject() {
     }   
     public UserInfoObject(int id) {
-        UserInfoObject userInfo = gson.fromJson(App.jedisPool.get("shiina:user:" + id),
-                        UserInfoObject.class);
+        String redisData = App.jedisPool.get("shiina:user:" + id);
+        if (redisData == null || redisData.isEmpty()) {
+            // Data not found, set id to -1
+            this.id = -1;
+            return;
+        }
+        UserInfoObject userInfo = gson.fromJson(redisData, UserInfoObject.class);
+        if (userInfo == null) {
+            // Parsing failed, set id to -1
+            this.id = -1;
+            return;
+        }
         this.id = userInfo.id;
         this.name = userInfo.name;
         this.safe_name = userInfo.safe_name;

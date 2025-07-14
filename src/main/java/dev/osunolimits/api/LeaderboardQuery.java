@@ -135,17 +135,20 @@ public class LeaderboardQuery {
             Response response = client.newCall(request).execute();
             JsonElement element = JsonParser.parseString(response.body().string());
             LeaderboardResponse leaderboardResponse = gson.fromJson(element, LeaderboardResponse.class);
+            if (leaderboardResponse == null || leaderboardResponse.getLeaderboard() == null) {
+                App.log.error("LeaderboardResponse or leaderboard is null");
+                return null;
+            }
             for (LeaderboardItem item : leaderboardResponse.getLeaderboard()) {
                 UserInfoObject userInfo = new UserInfoObject(item.getPlayerId());
-                if(userInfo != null) {
+                if(userInfo != null && userInfo.id != -1) {
                     item.setGroups(userInfo.getGroups());
+                    if(PermissionHelper.hasPrivileges(userInfo.priv, PermissionHelper.Privileges.SUPPORTER)) {
+                        userInfo.groups.add(ShiinaSupporterBadge.getInstance().getGroup());
+                        item.setSupporter(true);
+                    }
                 }
                 item.setAccuracy((double) Math.round(item.getAccuracy() * 100) / 100);
-                if(PermissionHelper.hasPrivileges(userInfo.priv, PermissionHelper.Privileges.SUPPORTER)) {
-                    userInfo.groups.add(ShiinaSupporterBadge.getInstance().getGroup());
-                    item.setSupporter(true);
-                }
-
             }
             return leaderboardResponse;
 
