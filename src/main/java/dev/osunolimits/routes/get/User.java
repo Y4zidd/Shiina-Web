@@ -148,7 +148,7 @@ public class User extends Shiina {
             }
         }
         EnumSet<PermissionHelper.Privileges> userPriv = PermissionHelper.Privileges.fromInt(user.getPlayer().getInfo().getPriv());
-        List<Group> groups = userInfo.getGroups();
+        List<Group> groups = userInfo != null ? userInfo.getGroups() : new ArrayList<>();
 
         shiina.data.put("follower", follower);
 
@@ -156,7 +156,7 @@ public class User extends Shiina {
             groups.add(ShiinaSupporterBadge.getInstance().getGroup());
         }
 
-        shiina.data.put("groups", userInfo.getGroups());
+        shiina.data.put("groups", groups);
         shiina.data.put("achievements", achievements);
 
         
@@ -177,6 +177,7 @@ public class User extends Shiina {
         shiina.data.put("u", user);
         shiina.data.put("mode", mode);
         shiina.data.put("status", userStatus);
+        String userName = userInfo != null ? userInfo.getName() : "Unknown";
         SEOBuilder seo = new SEOBuilder("Profile of " + userInfo.getName(), App.customization.get("homeDescription").toString(), App.env.get("AVATARSRV") + "/" + id);
         shiina.data.put("seo", seo);
         return renderTemplate("user.html", shiina, res, req);
